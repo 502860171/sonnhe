@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">语音指令</string>
+
+    <string name="say_hello">Hi,我是小赫，有事尽管吩咐？</string>
+    <string name="send">点击说话</string>
+    <string name="stop">点击停止</string>
+</resources>

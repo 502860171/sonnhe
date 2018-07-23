@@ -1,0 +1,82 @@
+import proguard.gradle.ProGuardTask
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+
+
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            zipAlignEnabled true
+//            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFile '/media/yezhangye/000546B800069833/ubuntu_project/androidproject/VoiceCommandApplication/voicelib/proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+//    api files('libs/okhttp-3.11.0.jar')
+    implementation files('libs/Msc.jar')
+    implementation files('libs/Sunflower.jar')
+}
+
+def SDK_BASENAME = "voiceSdk"
+def SDK_VERSION = "_V1.0"
+
+task deleteBuild(type: Delete) {
+    delete 'build/libs/' + SDK_BASENAME + SDK_VERSION + ".jar"
+}
+
+task makeJar(dependsOn: ['assembleRelease'], type: Jar) {
+    baseName = SDK_BASENAME + SDK_VERSION
+    from('build/intermediates/classes/release')
+    from(project.zipTree("libs/Msc.jar"))
+    from(project.zipTree("libs/Sunflower.jar"))
+    from fileTree(dir: 'src/main', includes: ['assets/**'])//将assets目录打入jar包
+    destinationDir = file('build/libs')
+    exclude('com/sonnhe/voicecommand/voicelib/BuildConfig.class')
+    exclude('com/sonnhe/voicecommand/voicelib/BuildConfig\$*.class')
+    exclude('**/R.class')
+    exclude('**/R\$.class')
+    include('com/sonnhe/voicecommand/voicelib/**/*.class')
+    include('cn/thinkit/libtmfe/**/*.class')
+    include('com/iflytek/**/*.class')
+    include('com/iflytek/sunflower/**/*.class')
+    include('com/squareup/okhttp3/**/*.class')
+}
+
+task makeGuardJar(type: ProGuardTask) {
+
+    // 未混淆的jar
+    injars 'build/libs/' + SDK_BASENAME + SDK_VERSION + ".jar"
+    // 混淆后的jar路径
+    outjars 'build/libs/' + SDK_BASENAME + SDK_VERSION + "_pro.jar"
+    configuration android.getDefaultProguardFile('proguard-android.txt')
+    // 具体需要keep住的类
+    configuration 'proguard-rules.pro'
+    configuration '/media/yezhangye/000546B800069833/ubuntu_project/androidproject/VoiceCommandApplication/voicelib/proguard-rules.pro'
+}
+
+//使用makeGuardJar命令执行该task
+makeGuardJar.dependsOn(build)
+makeJar.dependsOn(deleteBuild, build)
