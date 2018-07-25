@@ -6,6 +6,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.sonnhe.voicecommand.voicelib.model.SemanticResult;
 import com.sonnhe.voicecommand.voicelib.model.VoiceResult;
@@ -30,11 +31,15 @@ import okhttp3.Response;
 public class AudioRecordSemanticHandlerThread extends HandlerThread implements Handler.Callback {
 
     private static final String APP_FILE_DIRECTORY = File.separator + "voice";
-        private static final String URL = "http://www.sonnhe.com:8080";
-//    private static final String URL = "http://192.168.3.21:8080";
+    private static final String URL = "http://www.sonnhe.com:8080";
+    //    private static final String URL = "http://192.168.3.21:8080";
     private static final String REQUEST_OPENID = "123456789";
 
-    private static final String REQUEST_HTTP_ASR = URL + "/speech/api/voice/asr/v2/";
+    private static final String REQUEST_HTTP_ASR = URL + "/speech/api/voice/asr/";
+
+
+    private String mRequestUrl = REQUEST_HTTP_ASR;
+    private String mRequestOpenId = REQUEST_OPENID;
 
     // 开始录音
     private static final int MSG_START_RECORD = 1;
@@ -91,6 +96,18 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                 });
             }
         });
+    }
+
+    public void setRequestUrl(String requestUrl) {
+        if (!TextUtils.isEmpty(requestUrl)) {
+            this.mRequestUrl = requestUrl;
+        }
+    }
+
+    public void setRequestOpenId(String requestOpenId) {
+        if (!TextUtils.isEmpty(requestOpenId)) {
+            this.mRequestOpenId = requestOpenId;
+        }
     }
 
     @Override
@@ -174,7 +191,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
         try {
             File file = new File(mFilePath);
             if (file.exists()) {
-                sendVoiceDataToServer(file.getAbsolutePath(), REQUEST_HTTP_ASR);
+                sendVoiceDataToServer(file.getAbsolutePath(), mRequestUrl);
             } else {
                 mMainHandler.post(new Runnable() {
                     @Override
@@ -202,7 +219,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
             File file = new File(filePath);
             if (file.exists()) {
                 String result =
-                        requestResolve(url, file, REQUEST_OPENID);
+                        requestResolve(url, file, mRequestOpenId);
                 if (!TextUtils.isEmpty(result)) {
                     analysisResult(result, 0);
                 } else {

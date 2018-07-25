@@ -11,6 +11,7 @@ public class AudioRecordService {
     private RecordCallback mRecordCallback;
 
     private Context mContext;
+
     /**
      * 录音发送service
      */
@@ -42,6 +43,14 @@ public class AudioRecordService {
         mRecordCallback = recordCallback;
         mContext = context;
         initRecordService();
+    }
+
+    public void setRequestUrl(String requestUrl) {
+        mAudioRecordSemanticHandlerThread.setRequestUrl(requestUrl);
+    }
+
+    public void setRequestOpenId(String requestOpenId) {
+        mAudioRecordSemanticHandlerThread.setRequestOpenId(requestOpenId);
     }
 
     private void initRecordService() {
