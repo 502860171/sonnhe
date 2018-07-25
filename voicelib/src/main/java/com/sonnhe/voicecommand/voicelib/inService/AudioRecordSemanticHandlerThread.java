@@ -30,11 +30,11 @@ import okhttp3.Response;
 public class AudioRecordSemanticHandlerThread extends HandlerThread implements Handler.Callback {
 
     private static final String APP_FILE_DIRECTORY = File.separator + "voice";
-    private static final String URL = "http://60.205.112.141:8080";
-    //        private static final String URL = "http://192.168.3.21:8080";
+        private static final String URL = "http://www.sonnhe.com:8080";
+//    private static final String URL = "http://192.168.3.21:8080";
     private static final String REQUEST_OPENID = "123456789";
 
-    private static final String REQUEST_HTTP_ASR = URL + "/speech/api/voice/asr/";
+    private static final String REQUEST_HTTP_ASR = URL + "/speech/api/voice/asr/v2/";
 
     // 开始录音
     private static final int MSG_START_RECORD = 1;
@@ -353,6 +353,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("file", "file", fileBody)
                 .addFormDataPart("openId", openId)
+                .addFormDataPart("type", "1")
                 .build();
         Request request = new Request.Builder()
                 .url(url)
