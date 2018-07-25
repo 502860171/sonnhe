@@ -242,7 +242,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                 }
 
                 @Override
-                public void responseCmd(String cmd) {
+                public void responseCmd(String cmd, String cmdText) {
                     Log.i("activity->", "指令:" + cmd);
                     Log.e("activity->", "是否正在播放:" + mMediaPlayerService.isPlaying());
                     Log.e("activity->", "url:" + mMediaPlayerService.getVideoUrl());
@@ -391,8 +391,6 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
             mAdapter.notifyItemInserted(mMsgList.size() - 1);
             // 将RecyclerView定位到最后一行
             mMsgRecyclerView.scrollToPosition(mMsgList.size() - 1);
-            // yezhang test
-            mTTSService.startTTS(content);
         }
     }
 

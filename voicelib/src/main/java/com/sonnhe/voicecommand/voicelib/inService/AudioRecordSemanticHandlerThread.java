@@ -31,7 +31,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
 
     private static final String APP_FILE_DIRECTORY = File.separator + "voice";
     private static final String URL = "http://60.205.112.141:8080";
-    //    private static final String URL = "http://192.168.3.21:8080";
+    //        private static final String URL = "http://192.168.3.21:8080";
     private static final String REQUEST_OPENID = "123456789";
 
     private static final String REQUEST_HTTP_ASR = URL + "/speech/api/voice/asr/";
@@ -69,7 +69,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
 
         void responseNlp(String nlp);
 
-        void responseCmd(String cmd);
+        void responseCmd(String cmd, String cmdText);
 
         void responseError(int code, String message);
     }
@@ -248,10 +248,11 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                 final String text = data.getString("text");
                 if (!data.isNull("cmd")) {
                     final String cmd = data.getString("cmd");
+                    final String cmdText = data.getString("text");
                     mMainHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mRecordCallback.responseCmd(cmd);
+                            mRecordCallback.responseCmd(cmd, cmdText);
                         }
                     });
                 }

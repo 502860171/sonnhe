@@ -33,7 +33,7 @@ public class AudioRecordService {
 
         void responseNlp(String nlp);
 
-        void responseCmd(String cmd);
+        void responseCmd(String cmd, String cmdText);
 
         void responseError(int code, String message);
     }
@@ -83,8 +83,8 @@ public class AudioRecordService {
                 }
 
                 @Override
-                public void responseCmd(String cmd) {
-                    mRecordCallback.responseCmd(cmd);
+                public void responseCmd(String cmd, String cmdText) {
+                    mRecordCallback.responseCmd(cmd, cmdText);
                 }
 
                 @Override
