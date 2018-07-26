@@ -49,7 +49,7 @@ public class VADManager {
         mEngine.mfeSendDataByte(bytes, length);
         int detect_flag = mEngine.mfeDetect();
         System.out.println("**********detect_flag is 02:" + detect_flag);
-        if (detect_flag == 2) {
+        if (detect_flag >= 2) {
             if (mCallback != null) {
                 if (!isVadEnd) {
                     isVadEnd = true;
