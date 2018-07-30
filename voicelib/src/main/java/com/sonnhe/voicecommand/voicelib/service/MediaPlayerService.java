@@ -32,7 +32,7 @@ public class MediaPlayerService implements MediaPlayer.OnBufferingUpdateListener
             mediaPlayer.setOnCompletionListener(this);
             mediaPlayer.setOnBufferingUpdateListener(this);
             mediaPlayer.setDataSource(url);
-            mediaPlayer.prepare();
+            mediaPlayer.prepareAsync();
             // prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
