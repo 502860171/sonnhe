@@ -53,6 +53,10 @@ public class AudioRecordService {
         mAudioRecordSemanticHandlerThread.setRequestOpenId(requestOpenId);
     }
 
+    public void setBase64(boolean base64) {
+        mAudioRecordSemanticHandlerThread.setBase64(base64);
+    }
+
     private void initRecordService() {
         if (mAudioRecordSemanticHandlerThread == null) {
             mAudioRecordSemanticHandlerThread = new AudioRecordSemanticHandlerThread(new AudioRecordSemanticHandlerThread.RecordCallback() {
