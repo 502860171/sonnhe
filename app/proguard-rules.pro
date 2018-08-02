@@ -147,9 +147,10 @@
 -keep class com.squareup.okhttp3.** { *;}
 -dontwarn okio.**
 
+# jni
 -dontwarn cn.thinkit.libtmfe.test.**
 -keep class cn.thinkit.libtmfe.test.**{*;}
-
+# 语音lib
 -dontwarn com.sonnhe.voicecommand.voicelib.**
 -keep class com.sonnhe.voicecommand.voicelib.**{*;}
 

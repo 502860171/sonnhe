@@ -6,6 +6,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
+import android.util.Base64;
+import android.util.Log;
 
 import com.sonnhe.voicecommand.voicelib.model.SemanticResult;
 import com.sonnhe.voicecommand.voicelib.model.VoiceResult;
@@ -14,11 +16,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -30,11 +40,17 @@ import okhttp3.Response;
 public class AudioRecordSemanticHandlerThread extends HandlerThread implements Handler.Callback {
 
     private static final String APP_FILE_DIRECTORY = File.separator + "voice";
-    private static final String URL = "http://60.205.112.141:8080";
-    //        private static final String URL = "http://192.168.3.21:8080";
+    private static final String URL = "http://www.sonnhe.com:8080";
+    //    private static final String URL = "http://192.168.3.21:8080";
     private static final String REQUEST_OPENID = "123456789";
 
     private static final String REQUEST_HTTP_ASR = URL + "/speech/api/voice/asr/";
+    // 是否使用 base64 方式传输
+    private boolean isBase64 = false;
+
+
+    private String mRequestUrl = REQUEST_HTTP_ASR;
+    private String mRequestOpenId = REQUEST_OPENID;
 
     // 开始录音
     private static final int MSG_START_RECORD = 1;
@@ -91,6 +107,22 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                 });
             }
         });
+    }
+
+    public void setRequestUrl(String requestUrl) {
+        if (!TextUtils.isEmpty(requestUrl)) {
+            this.mRequestUrl = requestUrl;
+        }
+    }
+
+    public void setRequestOpenId(String requestOpenId) {
+        if (!TextUtils.isEmpty(requestOpenId)) {
+            this.mRequestOpenId = requestOpenId;
+        }
+    }
+
+    public void setBase64(boolean base64) {
+        isBase64 = base64;
     }
 
     @Override
@@ -174,7 +206,11 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
         try {
             File file = new File(mFilePath);
             if (file.exists()) {
-                sendVoiceDataToServer(file.getAbsolutePath(), REQUEST_HTTP_ASR);
+                if (!isBase64) {
+                    sendVoiceDataToServer(file.getAbsolutePath(), mRequestUrl);
+                } else {
+                    sendVoiceBase64ToServer(file.getAbsolutePath(), mRequestUrl);
+                }
             } else {
                 mMainHandler.post(new Runnable() {
                     @Override
@@ -194,6 +230,86 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
         }
     }
 
+    private void sendVoiceBase64ToServer(String filePath, String url) {
+        try {
+            File file = new File(filePath);
+            if (file.exists()) {
+                String res = base64_encode(file);
+                if (!TextUtils.isEmpty(res)) {
+                    Log.e("lib->", res);
+                    String result =
+                            requestResolve(url, res, mRequestOpenId);
+                    if (!TextUtils.isEmpty(result)) {
+                        analysisResult(result, 0);
+                    } else {
+                        mMainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mRecordCallback.sendDataError();
+                            }
+                        });
+                    }
+                } else {
+                    mMainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mRecordCallback.savePcmFileError();
+                        }
+                    });
+                }
+            } else {
+                mMainHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRecordCallback.savePcmFileError();
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            mMainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mRecordCallback.sendDataError();
+                }
+            });
+        }
+    }
+
+    private String base64_encode(File file) {
+        String res = "";
+        byte[] bytes = readFile(file);
+        res = Base64.encodeToString(bytes, Base64.DEFAULT);
+        return res;
+    }
+
+    //file文件读取成byte[]
+    private byte[] readFile(File file) {
+        RandomAccessFile rf = null;
+        byte[] data = null;
+        try {
+            rf = new RandomAccessFile(file, "r");
+            data = new byte[(int) rf.length()];
+            rf.readFully(data);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        } finally {
+            closeQuietly(rf);
+        }
+        return data;
+    }
+
+    //关闭读取file
+    private void closeQuietly(Closeable closeable) {
+        try {
+            if (closeable != null) {
+                closeable.close();
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
     /**
      * 发送语音文件到server
      */
@@ -202,7 +318,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
             File file = new File(filePath);
             if (file.exists()) {
                 String result =
-                        requestResolve(url, file, REQUEST_OPENID);
+                        requestResolve(url, file, mRequestOpenId);
                 if (!TextUtils.isEmpty(result)) {
                     analysisResult(result, 0);
                 } else {
@@ -361,7 +477,30 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
         Response response = client.newCall(request).execute();
         int httpCode = response.code();
         if (httpCode == 200) {
-            return response.body().string();
+            return Objects.requireNonNull(response.body()).string();
+        }
+        return null;
+    }
+
+    private String requestResolve(String url, String text, String openId) throws Exception {
+        Log.e("lib->", "isBase64:" + isBase64);
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .build();
+        RequestBody requestBody = new FormBody.Builder()
+                .add("text", text)
+                .add("openId", openId)
+                .add("isBase64", String.valueOf(isBase64))
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        Response response = client.newCall(request).execute();
+        int httpCode = response.code();
+        if (httpCode == 200) {
+            return Objects.requireNonNull(response.body()).string();
         }
         return null;
     }

@@ -270,6 +270,11 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                     replyMsg(code + ":" + message);
                 }
             }, mContext);
+            mRecordService.setRequestOpenId("123456789");
+//            mRecordService.setBase64(true);
+//            mRecordService.setRequestUrl("http://192.168.3.21:8080/speech/api/voice/asr/market");
+            mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
+//            mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
         }
     }
 
@@ -386,6 +391,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
      */
     private void replyMsg(String content) {
         if (!TextUtils.isEmpty(content)) {
+            Log.e("activity->", "添加一条msg(右侧):" + content);
             Msg msg = new Msg(content, Msg.TYPE_RECEIVED);
             mMsgList.add(msg);
             mAdapter.notifyItemInserted(mMsgList.size() - 1);
@@ -399,6 +405,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
      */
     private void addMsg(String content) {
         if (!TextUtils.isEmpty(content)) {
+            Log.e("activity->", "添加一条msg(左侧):" + content);
             Msg msg = new Msg(content, Msg.TYPE_SENT);
             mMsgList.add(msg);
             mAdapter.notifyItemInserted(mMsgList.size() - 1);
