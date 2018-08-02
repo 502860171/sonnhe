@@ -271,7 +271,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                 }
             }, mContext);
             mRecordService.setRequestOpenId("123456789");
-//            mRecordService.setBase64(true);
+            mRecordService.setBase64(false);
 //            mRecordService.setRequestUrl("http://192.168.3.21:8080/speech/api/voice/asr/market");
             mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
 //            mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
