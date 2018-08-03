@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sonnhe.voicecommand.voicecommandapplication.model.Msg;
 import com.sonnhe.voicecommand.voicecommandapplication.service.adapter.MsgAdapter;
@@ -24,11 +25,13 @@ import com.sonnhe.voicecommand.voicecommandapplication.service.adapter.MsgAdapte
 import com.sonnhe.voicecommand.voicelib.model.SemanticResult;
 import com.sonnhe.voicecommand.voicelib.model.VoiceResult;
 import com.sonnhe.voicecommand.voicelib.service.AudioRecordService;
+import com.sonnhe.voicecommand.voicelib.inService.AudioTrackHandlerThread;
 import com.sonnhe.voicecommand.voicelib.service.MediaPlayerService;
-import com.sonnhe.voicecommand.voicelib.service.TTSService;
+import com.sonnhe.voicecommand.voicelib.inService.RequestTTSService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class VoiceMainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -55,7 +58,9 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
      * 录音发送service
      */
     private AudioRecordService mRecordService = null;
-    private TTSService mTTSService = null;
+    private RequestTTSService mTTSService;
+    private AudioTrackHandlerThread mPlayer;
+//    private TTSService mTTSService = null;
     private MediaPlayerService mMediaPlayerService;
 
     @Override
@@ -87,6 +92,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                     initMediaPlayerManager();
                     initRecordService();
                     initTTSService();
+                    initPlayer();
                 } else {
                     isCanRecordAudio = false;
                 }
@@ -109,19 +115,25 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},
+                    ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.RECORD_AUDIO,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                            Manifest.permission.RECORD_AUDIO},
                             EXTERNAL_STORAGE_RECORD_AUDIO);
                 } else {
                     isCanRecordAudio = true;
                     initMediaPlayerManager();
                     initRecordService();
                     initTTSService();
+                    initPlayer();
                 }
             } else {
                 isCanRecordAudio = true;
                 initMediaPlayerManager();
                 initRecordService();
                 initTTSService();
+                initPlayer();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -149,20 +161,50 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
 
     private void initTTSService() {
         if (mTTSService == null) {
-            mTTSService = TTSService.instance(mContext, new TTSService.TTSCallback() {
+            mTTSService = new RequestTTSService(new RequestTTSService.RequestCallback() {
                 @Override
-                public void onCompleted() {
-                    Log.e("activity->", "tts播放完成");
-                    if (ttsIsPlay) {
-                        playUrl();
+                public void requestSuccess(Map<String, Object> returnMap) {
+                    Toast.makeText(mContext, "请求成功", Toast.LENGTH_LONG).show();
+                    byte[] mBytes = (byte[]) returnMap.get("bytes");
+                    if (mBytes != null && mBytes.length > 0) {
+                        mPlayer.setData(mBytes);
+                        mPlayer.startPlay();
                     }
                 }
+
+                @Override
+                public void requestError(String error) {
+                    Toast.makeText(mContext, error, Toast.LENGTH_LONG).show();
+                }
             });
+            mTTSService.getLooper();
+            mTTSService.start();
         }
     }
 
     private void initMediaPlayerManager() {
         mMediaPlayerService = new MediaPlayerService();
+    }
+
+    private void initPlayer() {
+        if (mPlayer == null) {
+            mPlayer = new AudioTrackHandlerThread(new AudioTrackHandlerThread.AudioTrackCallback() {
+                @Override
+                public void playComplete() {
+                    Toast.makeText(mContext, "播放完成", Toast.LENGTH_LONG).show();
+                    if (ttsIsPlay){
+                        playUrl();
+                    }
+                }
+
+                @Override
+                public void setDataError() {
+                    Toast.makeText(mContext, "初始化数据错误", Toast.LENGTH_LONG).show();
+                }
+            });
+            mPlayer.getLooper();
+            mPlayer.start();
+        }
     }
 
     private void mediaPlayerStop() {
@@ -225,7 +267,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                                 } else {
                                     result.append(asr.getSemanticTts());
                                     mediaPlayerStop();
-                                    mTTSService.startTTS(asr.getSemanticTts());
+                                    mTTSService.requestTTS(asr.getSemanticTts());
                                 }
                             }
                         }
@@ -237,7 +279,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                 public void responseNlp(String nlp) {
                     Log.i("activity->", "收到nlp回传:" + nlp);
                     replyMsg(nlp);
-                    mTTSService.startTTS(nlp);
+                    mTTSService.requestTTS(nlp);
                     ttsIsPlay = false;
                 }
 
@@ -273,8 +315,8 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
             mRecordService.setRequestOpenId("123456789");
             mRecordService.setBase64(false);
 //            mRecordService.setRequestUrl("http://192.168.3.21:8080/speech/api/voice/asr/market");
+//            mRecordService.setRequestUrl("http://www.sonnhe.com/ttsParse/api/translate/");
             mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
-//            mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
         }
     }
 
@@ -305,7 +347,6 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
     private void sendClick() {
         if (isCanRecordAudio) {
             Log.e("activity->", "send-click");
-            mTTSService.stopTTS();
             if (!isRecording) {
                 startRecordAction();
             } else {
