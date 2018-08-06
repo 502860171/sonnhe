@@ -28,6 +28,8 @@ import com.sonnhe.voicecommand.voicelib.service.AudioRecordService;
 import com.sonnhe.voicecommand.voicelib.inService.AudioTrackHandlerThread;
 import com.sonnhe.voicecommand.voicelib.service.MediaPlayerService;
 import com.sonnhe.voicecommand.voicelib.inService.RequestTTSService;
+import com.sonnhe.voicecommand.voicelib.service.SonnheAudioTrackService;
+import com.sonnhe.voicecommand.voicelib.service.SonnheTTSService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
     private MsgAdapter mAdapter;
     private AnimationDrawable mAnimRecord;
 
+
     private List<Msg> mMsgList = new ArrayList<>();
     // 是否正在录音
     private boolean isRecording = false;
@@ -58,8 +61,11 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
      * 录音发送service
      */
     private AudioRecordService mRecordService = null;
+
     private RequestTTSService mTTSService;
     private AudioTrackHandlerThread mPlayer;
+    private SonnheTTSService mSonnheTTSService;
+    private SonnheAudioTrackService mSonnheAudioTrackService;
 //    private TTSService mTTSService = null;
     private MediaPlayerService mMediaPlayerService;
 
@@ -160,15 +166,15 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void initTTSService() {
-        if (mTTSService == null) {
-            mTTSService = new RequestTTSService(new RequestTTSService.RequestCallback() {
+        if (mSonnheTTSService == null) {
+            mSonnheTTSService = new SonnheTTSService(new SonnheTTSService.RequestCallback() {
                 @Override
                 public void requestSuccess(Map<String, Object> returnMap) {
                     Toast.makeText(mContext, "请求成功", Toast.LENGTH_LONG).show();
                     byte[] mBytes = (byte[]) returnMap.get("bytes");
                     if (mBytes != null && mBytes.length > 0) {
-                        mPlayer.setData(mBytes);
-                        mPlayer.startPlay();
+                        mSonnheAudioTrackService.setData(mBytes);
+                        mSonnheAudioTrackService.startPlay();
                     }
                 }
 
@@ -177,8 +183,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                     Toast.makeText(mContext, error, Toast.LENGTH_LONG).show();
                 }
             });
-            mTTSService.getLooper();
-            mTTSService.start();
+
         }
     }
 
@@ -187,8 +192,8 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void initPlayer() {
-        if (mPlayer == null) {
-            mPlayer = new AudioTrackHandlerThread(new AudioTrackHandlerThread.AudioTrackCallback() {
+        if (mSonnheAudioTrackService == null) {
+            mSonnheAudioTrackService = new SonnheAudioTrackService(new SonnheAudioTrackService.AudioTrackCallback() {
                 @Override
                 public void playComplete() {
                     Toast.makeText(mContext, "播放完成", Toast.LENGTH_LONG).show();
@@ -202,8 +207,6 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                     Toast.makeText(mContext, "初始化数据错误", Toast.LENGTH_LONG).show();
                 }
             });
-            mPlayer.getLooper();
-            mPlayer.start();
         }
     }
 
@@ -267,7 +270,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                                 } else {
                                     result.append(asr.getSemanticTts());
                                     mediaPlayerStop();
-                                    mTTSService.requestTTS(asr.getSemanticTts());
+                                    mSonnheTTSService.requestTTS(asr.getSemanticTts());
                                 }
                             }
                         }
@@ -279,7 +282,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                 public void responseNlp(String nlp) {
                     Log.i("activity->", "收到nlp回传:" + nlp);
                     replyMsg(nlp);
-                    mTTSService.requestTTS(nlp);
+                    mSonnheTTSService.requestTTS(nlp);
                     ttsIsPlay = false;
                 }
 
