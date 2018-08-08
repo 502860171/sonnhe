@@ -2,7 +2,6 @@ package com.sonnhe.voicecommand.voicelib.inService;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -219,38 +218,38 @@ public class RequestTTSService extends HandlerThread implements Handler.Callback
         return false;
     }
 
-    /**
-     * 创建sd卡，sonnhe根目录
-     */
-    private String createSDParentPath() throws IOException {
-        String sdDir = getSDPath();
-        if (!TextUtils.isEmpty(sdDir)) {
-            File sdFile = new File(sdDir + File.separator + "sonnhe" +
-                    File.separator + "tts");
-            if (!sdFile.exists()) {
-                if (!sdFile.mkdirs()) {
-                    return null;
-                }
-                return sdFile.getCanonicalPath();
-            } else {
-                return sdFile.getCanonicalPath();
-            }
-        }
-        return null;
-    }
+//    /**
+//     * 创建sd卡，sonnhe根目录
+//     */
+//    private String createSDParentPath() throws IOException {
+//        String sdDir = getSDPath();
+//        if (!TextUtils.isEmpty(sdDir)) {
+//            File sdFile = new File(sdDir + File.separator + "sonnhe" +
+//                    File.separator + "tts");
+//            if (!sdFile.exists()) {
+//                if (!sdFile.mkdirs()) {
+//                    return null;
+//                }
+//                return sdFile.getCanonicalPath();
+//            } else {
+//                return sdFile.getCanonicalPath();
+//            }
+//        }
+//        return null;
+//    }
 
-    /**
-     * 获得sd根目录 path
-     */
-    private String getSDPath() throws IOException {
-        File sdDir;
-        // 判断sd卡是否存在
-        boolean sdExist = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-        if (sdExist) {
-            // 获取根目录
-            sdDir = Environment.getExternalStorageDirectory();
-            return sdDir.getCanonicalPath();
-        }
-        return "";
-    }
+//    /**
+//     * 获得sd根目录 path
+//     */
+//    private String getSDPath() throws IOException {
+//        File sdDir;
+//        // 判断sd卡是否存在
+//        boolean sdExist = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+//        if (sdExist) {
+//            // 获取根目录
+//            sdDir = Environment.getExternalStorageDirectory();
+//            return sdDir.getCanonicalPath();
+//        }
+//        return "";
+//    }
 }

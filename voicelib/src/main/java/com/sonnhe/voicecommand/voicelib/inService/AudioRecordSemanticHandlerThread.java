@@ -16,12 +16,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,8 +59,6 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
     private RecordCallback mRecordCallback;
     // 录音文件的路径
     private String mFilePath;
-    // 是否正在录音
-    private boolean isRecording = false;
     private Context mContext;
     private AudioRecordManager mAudioRecordManager;
 
@@ -173,7 +167,6 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
 //                mFilePath = parentFilePath + File.separator +
 //                        DateUtil.getNowToFileName() + ".pcm";
                 mFilePath = parentFilePath + File.separator + "asr.pcm";
-                isRecording = true;
                 mAudioRecordManager.startRecord(mFilePath);
                 mMainHandler.post(new Runnable() {
                     @Override
@@ -202,7 +195,6 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
 
     private void stopRecordThread() {
         mAudioRecordManager.stopRecord();
-        isRecording = false;
         try {
             File file = new File(mFilePath);
             if (file.exists()) {
@@ -240,7 +232,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                     String result =
                             requestResolve(url, res, mRequestOpenId);
                     if (!TextUtils.isEmpty(result)) {
-                        analysisResult(result, 0);
+                        analysisResult(result);
                     } else {
                         mMainHandler.post(new Runnable() {
                             @Override
@@ -277,7 +269,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
     }
 
     private String base64_encode(File file) {
-        String res = "";
+        String res;
         byte[] bytes = readFile(file);
         res = Base64.encodeToString(bytes, Base64.DEFAULT);
         return res;
@@ -320,7 +312,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                 String result =
                         requestResolve(url, file, mRequestOpenId);
                 if (!TextUtils.isEmpty(result)) {
-                    analysisResult(result, 0);
+                    analysisResult(result);
                 } else {
                     mMainHandler.post(new Runnable() {
                         @Override
@@ -350,45 +342,34 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
 
     /**
      * 解析回传结果
+     *  @param result server回传的json String
      *
-     * @param result server回传的json String
-     * @param type   0: text 1:tts
      */
-    private void analysisResult(String result, int type) throws JSONException {
+    private void analysisResult(String result) throws JSONException {
         JSONObject object = new JSONObject(result);
         final int code = object.getInt("code");
         final String message = object.getString("message");
         if (code == 200) {
             final JSONObject data = object.getJSONObject("data");
-            if (type == 0) {
-                final String text = data.getString("text");
-                if (!data.isNull("cmd")) {
-                    final String cmd = data.getString("cmd");
-                    final String cmdText = data.getString("text");
-                    mMainHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mRecordCallback.responseCmd(cmd, cmdText);
-                        }
-                    });
-                }
-                final VoiceResult voiceResult = voiceResultHandler(result);
+            //                final String text = data.getString("text");
+            if (!data.isNull("cmd")) {
+                final String cmd = data.getString("cmd");
+                final String cmdText = data.getString("text");
                 mMainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        mRecordCallback.responseAsr(voiceResult);
+                        mRecordCallback.responseCmd(cmd, cmdText);
                     }
                 });
-                if (!data.isNull("tts")) {
-                    final String tts = data.getString("tts");
-                    mMainHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mRecordCallback.responseNlp(tts);
-                        }
-                    });
+            }
+            final VoiceResult voiceResult = voiceResultHandler(result);
+            mMainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mRecordCallback.responseAsr(voiceResult);
                 }
-            } else if (type == 1) {
+            });
+            if (!data.isNull("tts")) {
                 final String tts = data.getString("tts");
                 mMainHandler.post(new Runnable() {
                     @Override
@@ -397,6 +378,43 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                     }
                 });
             }
+//            if (type == 0) {
+////                final String text = data.getString("text");
+//                if (!data.isNull("cmd")) {
+//                    final String cmd = data.getString("cmd");
+//                    final String cmdText = data.getString("text");
+//                    mMainHandler.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            mRecordCallback.responseCmd(cmd, cmdText);
+//                        }
+//                    });
+//                }
+//                final VoiceResult voiceResult = voiceResultHandler(result);
+//                mMainHandler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mRecordCallback.responseAsr(voiceResult);
+//                    }
+//                });
+//                if (!data.isNull("tts")) {
+//                    final String tts = data.getString("tts");
+//                    mMainHandler.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            mRecordCallback.responseNlp(tts);
+//                        }
+//                    });
+//                }
+//            } else if (type == 1) {
+//                final String tts = data.getString("tts");
+//                mMainHandler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        mRecordCallback.responseNlp(tts);
+//                    }
+//                });
+//            }
         } else {
             mMainHandler.post(new Runnable() {
                 @Override
