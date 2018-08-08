@@ -72,12 +72,6 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    protected void onStop() {
-        mMediaPlayerService.release();
-        super.onStop();
-    }
-
-    @Override
     protected void onDestroy() {
         mMediaPlayerService.release();
         super.onDestroy();
