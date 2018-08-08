@@ -154,20 +154,20 @@
 -dontwarn com.sonnhe.voicecommand.voicelib.**
 -keep class com.sonnhe.voicecommand.voicelib.**{*;}
 
--libraryjars libs/armeabi/libmsc.so
--libraryjars libs/armeabi/libspeechRec-jni.so
+#-libraryjars libs/armeabi/libmsc.so
+#-libraryjars libs/armeabi/libspeechRec-jni.so
 -libraryjars libs/armeabi/libtmfe30.so
 
--libraryjars libs/armeabi-v7a/libmsc.so
--libraryjars libs/armeabi-v7a/libspeechRec-jni.so
+#-libraryjars libs/armeabi-v7a/libmsc.so
+#-libraryjars libs/armeabi-v7a/libspeechRec-jni.so
 -libraryjars libs/armeabi-v7a/libtmfe30.so
 
--libraryjars libs/mips/libmsc.so
--libraryjars libs/mips/libspeechRec-jni.so
+#-libraryjars libs/mips/libmsc.so
+#-libraryjars libs/mips/libspeechRec-jni.so
 -libraryjars libs/mips/libtmfe30.so
 
--libraryjars libs/x86/libmsc.so
--libraryjars libs/x86/libspeechRec-jni.so
+#-libraryjars libs/x86/libmsc.so
+#-libraryjars libs/x86/libspeechRec-jni.so
 -libraryjars libs/x86/libtmfe30.so
 #-libraryjars src/main/jniLibs/armeabi/libmsc.so
 #-libraryjars src/main/jniLibs/armeabi-v7a/libmsc.so

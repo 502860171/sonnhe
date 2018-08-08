@@ -10,8 +10,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 20
-        versionName "2.0.1"
+        versionCode 21
+        versionName "2.0.2"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -36,8 +36,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
 //    api files('libs/okhttp-3.11.0.jar')
-    implementation files('libs/Msc.jar')
-    implementation files('libs/Sunflower.jar')
+//    implementation files('libs/Msc.jar')
+//    implementation files('libs/Sunflower.jar')
 }
 
 def SDK_BASENAME = "voiceSdk"
