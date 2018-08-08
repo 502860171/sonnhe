@@ -23,7 +23,7 @@ android {
             zipAlignEnabled true
 //            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            proguardFile '/media/yezhangye/000546B800069833/ubuntu_project/androidproject/VoiceCommandApplication/voicelib/proguard-rules.pro'
+            proguardFile '/media/yezhangye/000546B800069833/ubuntu_project/androidproject/VoiceCommandApplication_tian/voicelib/proguard-rules.pro'
         }
     }
 

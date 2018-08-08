@@ -31,6 +31,7 @@ import com.sonnhe.voicecommand.voicelib.inService.RequestTTSService;
 import com.sonnhe.voicecommand.voicelib.service.SonnheAudioTrackService;
 import com.sonnhe.voicecommand.voicelib.service.SonnheTTSService;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -80,12 +81,13 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     protected void onStop() {
+        mMediaPlayerService.release();
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        mediaPlayerStop();
+        mMediaPlayerService.release();
         super.onDestroy();
     }
 
@@ -123,9 +125,9 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                         Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(this, new String[]{
                             Manifest.permission.RECORD_AUDIO,
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
                             Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                            Manifest.permission.RECORD_AUDIO},
+                            Manifest.permission.RECORD_AUDIO,
+                            },
                             EXTERNAL_STORAGE_RECORD_AUDIO);
                 } else {
                     isCanRecordAudio = true;
@@ -161,6 +163,8 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
         mAdapter.setOnClickListener(new MsgAdapter.OnClickCallBack() {
             @Override
             public void callback(int position, String text) {
+
+                mediaPlayerStop();
             }
         });
     }
@@ -182,7 +186,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                 public void requestError(String error) {
                     Toast.makeText(mContext, error, Toast.LENGTH_LONG).show();
                 }
-            });
+            },mContext);
 
         }
     }
@@ -368,6 +372,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
         playAnimRecord();
         recordAlert();
         startRecord();
+        mediaPlayerStop();
     }
 
     /**

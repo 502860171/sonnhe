@@ -2,7 +2,6 @@ package com.sonnhe.voicecommand.voicelib.service;
 
 import android.content.Context;
 
-import com.sonnhe.voicecommand.voicelib.inService.AudioTrackHandlerThread;
 import com.sonnhe.voicecommand.voicelib.inService.RequestTTSService;
 
 import java.util.Map;
@@ -12,6 +11,8 @@ public class SonnheTTSService {
 
 
     private RequestCallback mRequestCallback;
+
+    private Context mContext;
 
 
     private RequestTTSService mRequestTTSService = null;
@@ -26,7 +27,8 @@ public class SonnheTTSService {
 
 
 
-    public SonnheTTSService(RequestCallback requestCallback){
+    public SonnheTTSService(RequestCallback requestCallback, Context context){
+        mContext = context;
         mRequestCallback = requestCallback;
         initTTSService();
     }
@@ -45,7 +47,7 @@ public class SonnheTTSService {
                 public void requestError(String error) {
                     mRequestCallback.requestError(error);
                 }
-            });
+            },mContext);
         }
         mRequestTTSService.getLooper();
         mRequestTTSService.start();

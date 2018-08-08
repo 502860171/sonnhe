@@ -1,5 +1,6 @@
 package com.sonnhe.voicecommand.voicelib.inService;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -36,10 +37,13 @@ public class RequestTTSService extends HandlerThread implements Handler.Callback
     private Handler mMainHandler;
     private Handler mHandler;
     private RequestCallback mCallback;
+    private Context mContext;
 
-    public RequestTTSService(RequestCallback callback) {
+
+    public RequestTTSService(RequestCallback callback, Context context) {
         super("RequestTTSService");
         this.mCallback = callback;
+        mContext = context;
         mMainHandler = new Handler(Looper.getMainLooper());
     }
 
@@ -204,10 +208,9 @@ public class RequestTTSService extends HandlerThread implements Handler.Callback
     }
 
     private boolean createTTSFile(byte[] bytes) throws IOException {
-        String parentFile = createSDParentPath();
-        Log.e("lib->", "parentFile:" + parentFile);
-        if (!TextUtils.isEmpty(parentFile)) {
-            File file = new File(parentFile + File.separator + "export.wav");
+        if (!TextUtils.isEmpty(String.valueOf(mContext.getFilesDir()))) {
+            File file = new File(String.valueOf(mContext.getFilesDir()) + "export.wav");
+            Log.e("lib->", String.valueOf(mContext.getFilesDir()) + "export.wav");
             OutputStream output = new FileOutputStream(file);
             BufferedOutputStream bufferedOutput = new BufferedOutputStream(output);
             bufferedOutput.write(bytes);

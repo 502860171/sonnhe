@@ -125,6 +125,18 @@ public class MediaPlayerService implements MediaPlayer.OnBufferingUpdateListener
         playNet(mediaPlayer.getCurrentPosition());
         playing = true;
     }
+    /**
+     * 释放
+     */
+    public void release(){
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+
+    }
 
     /**
      * 重播
