@@ -112,7 +112,6 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                     ActivityCompat.requestPermissions(this, new String[]{
                                     Manifest.permission.RECORD_AUDIO,
                                     Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                                    Manifest.permission.RECORD_AUDIO,
                             },
                             EXTERNAL_STORAGE_RECORD_AUDIO);
                 } else {
@@ -295,11 +294,11 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                     replyMsg(code + ":" + message);
                 }
             }, mContext);
-            mRecordService.setRequestOpenId("123456789");
+            mRecordService.setRequestOpenId("e8368c10&6c3b1f82");
             mRecordService.setBase64(false);
-//            mRecordService.setRequestUrl("http://192.168.3.21:8080/speech/api/voice/asr/market");
+            mRecordService.setRequestUrl("http://192.168.3.21:8080/speech/api/voice/asr");
 //            mRecordService.setRequestUrl("http://www.sonnhe.com/ttsParse/api/translate/");
-            mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
+//            mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
         }
     }
 
@@ -312,6 +311,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
             if (item != null && !TextUtils.isEmpty(item.getUrl())) {
                 Log.e("activity->", "应播放:" + item.getUrl());
                 Log.e("activity->", "现在:" + mMediaPlayerService.getVideoUrl());
+                Log.e("activity->", "这里002:" + mMediaPlayerService.isPlaying());
                 if (mMediaPlayerService.isPlaying()) {
                     mMediaPlayerService.stop();
                     if (!mMediaPlayerService.getVideoUrl().equals(item.getUrl())) {

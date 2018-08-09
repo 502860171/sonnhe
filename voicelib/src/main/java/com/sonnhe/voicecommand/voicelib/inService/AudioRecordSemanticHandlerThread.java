@@ -1,10 +1,12 @@
 package com.sonnhe.voicecommand.voicelib.inService;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -38,7 +40,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
     private static final String APP_FILE_DIRECTORY = File.separator + "voice";
     private static final String URL = "http://www.sonnhe.com:8080";
     //    private static final String URL = "http://192.168.3.21:8080";
-    private static final String REQUEST_OPENID = "123456789";
+//    private static final String REQUEST_OPENID = "123456789";
 
     private static final String REQUEST_HTTP_ASR = URL + "/speech/api/voice/asr/";
     // 是否使用 base64 方式传输
@@ -46,7 +48,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
 
 
     private String mRequestUrl = REQUEST_HTTP_ASR;
-    private String mRequestOpenId = REQUEST_OPENID;
+    private String mRequestOpenId;
 
     // 开始录音
     private static final int MSG_START_RECORD = 1;
@@ -101,6 +103,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                 });
             }
         });
+
     }
 
     public void setRequestUrl(String requestUrl) {
@@ -111,7 +114,13 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
 
     public void setRequestOpenId(String requestOpenId) {
         if (!TextUtils.isEmpty(requestOpenId)) {
-            this.mRequestOpenId = requestOpenId;
+            String androidId = getAndroidId();
+            if (TextUtils.isEmpty(androidId)) {
+                androidId = "sonnheAndroidId";
+            }
+            this.mRequestOpenId = requestOpenId + "&" + androidId;
+        } else {
+            this.mRequestOpenId = "123456789";
         }
     }
 
@@ -309,6 +318,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
         try {
             File file = new File(filePath);
             if (file.exists()) {
+                Log.e("lib->", "openId:" + mRequestOpenId);
                 String result =
                         requestResolve(url, file, mRequestOpenId);
                 if (!TextUtils.isEmpty(result)) {
@@ -342,8 +352,8 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
 
     /**
      * 解析回传结果
-     *  @param result server回传的json String
      *
+     * @param result server回传的json String
      */
     private void analysisResult(String result) throws JSONException {
         JSONObject object = new JSONObject(result);
@@ -521,5 +531,17 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
             return Objects.requireNonNull(response.body()).string();
         }
         return null;
+    }
+
+//    private String getWlanId() {
+//        WifiManager wm = (WifiManager) mContext.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+//        assert wm != null;
+//        @SuppressLint("HardwareIds") String m_szWLANMAC = wm.getConnectionInfo().getMacAddress();
+//        return m_szWLANMAC;
+//    }
+
+    @SuppressLint("HardwareIds")
+    private String getAndroidId() {
+        return Settings.Secure.getString(mContext.getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 }
