@@ -30,7 +30,6 @@ import com.sonnhe.voicecommand.voicelib.service.SonnheTTSService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class VoiceMainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -58,7 +57,6 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
      * 录音发送service
      */
     private AudioRecordService mRecordService = null;
-
     private SonnheTTSService mSonnheTTSService;
     private MediaPlayerService mMediaPlayerService;
 
@@ -155,14 +153,14 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
     private void initTTSService() {
         if (mSonnheTTSService == null) {
             mSonnheTTSService = new SonnheTTSService(new SonnheTTSService.RequestCallback() {
-                @Override
-                public void requestSuccess(Map<String, Object> returnMap) {
-                    byte[] mBytes = (byte[]) returnMap.get("bytes");
-                    if (mBytes != null && mBytes.length > 0) {
-                        mSonnheTTSService.setData(mBytes);
-                        mSonnheTTSService.startPlay();
-                    }
-                }
+//                @Override
+//                public void requestSuccess(Map<String, Object> returnMap) {
+//                    byte[] mBytes = (byte[]) returnMap.get("bytes");
+//                    if (mBytes != null && mBytes.length > 0) {
+//                        mSonnheTTSService.setData(mBytes);
+//                        mSonnheTTSService.startPlay();
+//                    }
+//                }
 
                 @Override
                 public void requestError(String error) {
@@ -296,8 +294,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
             }, mContext);
             mRecordService.setRequestOpenId("e8368c10&6c3b1f82");
             mRecordService.setBase64(false);
-            mRecordService.setRequestUrl("http://192.168.3.21:8080/speech/api/voice/asr");
-//            mRecordService.setRequestUrl("http://www.sonnhe.com/ttsParse/api/translate/");
+            mRecordService.setRequestUrl("http://192.168.3.21:8080/speech/api/voice/asr/chineseMedicine");
 //            mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
         }
     }

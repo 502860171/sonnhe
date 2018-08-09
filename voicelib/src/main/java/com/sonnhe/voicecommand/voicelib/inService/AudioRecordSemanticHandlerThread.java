@@ -356,6 +356,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
      * @param result server回传的json String
      */
     private void analysisResult(String result) throws JSONException {
+        Log.e("lib->", "nlp:" + result);
         JSONObject object = new JSONObject(result);
         final int code = object.getInt("code");
         final String message = object.getString("message");

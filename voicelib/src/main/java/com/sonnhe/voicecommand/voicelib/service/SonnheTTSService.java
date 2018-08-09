@@ -19,7 +19,7 @@ public class SonnheTTSService {
     private AudioTrackHandlerThread mAudioTrackHandlerThread = null;
 
     public interface RequestCallback {
-        void requestSuccess(Map<String, Object> returnMap);
+//        void requestSuccess(Map<String, Object> returnMap);
 
         void requestError(String error);
 
@@ -32,8 +32,8 @@ public class SonnheTTSService {
     public SonnheTTSService(RequestCallback requestCallback, Context context) {
         mContext = context;
         mRequestCallback = requestCallback;
-        initTTSService();
         initTrackService();
+        initTTSService();
     }
 
 
@@ -42,7 +42,12 @@ public class SonnheTTSService {
             mRequestTTSService = new RequestTTSService(new RequestTTSService.RequestCallback() {
                 @Override
                 public void requestSuccess(Map<String, Object> returnMap) {
-                    mRequestCallback.requestSuccess(returnMap);
+                    byte[] mBytes = (byte[]) returnMap.get("bytes");
+                    if (mBytes != null && mBytes.length > 0) {
+                        mAudioTrackHandlerThread.setData(mBytes);
+                        mAudioTrackHandlerThread.startPlay();
+                    }
+//                    mRequestCallback.requestSuccess(returnMap);
                 }
 
                 @Override
@@ -80,13 +85,13 @@ public class SonnheTTSService {
         mRequestTTSService.requestTTS(text);
     }
 
-    public void setData(byte[] bytes) {
-        mAudioTrackHandlerThread.setData(bytes);
-    }
-
-    public void startPlay() {
-        mAudioTrackHandlerThread.startPlay();
-    }
+//    public void setData(byte[] bytes) {
+//        mAudioTrackHandlerThread.setData(bytes);
+//    }
+//
+//    public void startPlay() {
+//        mAudioTrackHandlerThread.startPlay();
+//    }
 
     public void stopPlay() {
         mAudioTrackHandlerThread.stopPlay();
