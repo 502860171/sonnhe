@@ -39,6 +39,13 @@
                 mSonnheTTSService = new SonnheTTSService(new SonnheTTSService.RequestCallback({...});
             }
         开始tts：
-            mSonnheTTSService.requestTTS(content);; // content 为需要转换为语音的文本
+            mSonnheTTSService.requestTTS(content);; // content 需要转换为语音的文本
         停止tts：
             mSonnheTTSService.stopPlay();
+        释放tts语音资源:
+            mSonnheTTSService.release();
+        tts服务回调接口(SonnheTTSService.RequestCallback)
+            requestError : 发送语音数据失败
+            setDataError : 初始化tts接口失败
+            playComplete : tts语音数据播放完成
+
