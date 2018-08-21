@@ -48,4 +48,23 @@
             requestError : 发送语音数据失败
             setDataError : 初始化tts接口失败
             playComplete : tts语音数据播放完成
+    媒体播放服务:
+        初始化媒体播放服务：
+            mMediaPlayerService = new MediaPlayerService();
+        释放媒体播放资源：
+            mMediaPlayerService.release();
+        判断是否正在播放:
+            mMediaPlayerService.isPlaying();
+        停止播放:
+            mMediaPlayerService.stop();
+        获得正在播放的资源的url:
+            mMediaPlayerService.getVideoUrl();
+        是否处在暂停状态:
+            mMediaPlayerService.isPause();
+        播放、继续播放:
+            mMediaPlayerService.play();
+        暂停播放:
+            mMediaPlayerService.pause();
+        放入媒体资源:
+            mMediaPlayerService.init(资源的url);
 
