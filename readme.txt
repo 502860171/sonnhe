@@ -23,8 +23,16 @@
             responseAsr : 接收到asr数据 (把用户的语音转换为文本:((VoiceResult)asr).getDataText())
             responseNlp : 接收到nlp回传
             responseNlpJson: 返回nlp json
-            responseCmd : 暂时可以忽略
+            responseCmd : 收到 asr 指令信息
             responseError : 接收服务器回传错误
+        设置asr请求密钥
+            mRecordService.setRequestOpenId("商户id&产品id");
+        设置传输类型 (是否使用base64传输)
+            mRecordService.setBase64(false);
+        设置传输的种类 (在此url中生效 http://www.sonnhe.com/speech/api/voice/asr)
+            mRecordService.setRequestType(0);
+        设置传输url
+            mRecordService.setRequestUrl("http://www.sonnhe.com/speech/api/voice/asr/market");
     tts服务:
         初始化tts服务:
             if (mSonnheTTSService == null) {
