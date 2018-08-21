@@ -72,6 +72,7 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
     @Override
     protected void onDestroy() {
         mMediaPlayerService.release();
+        mSonnheTTSService.release();
         super.onDestroy();
     }
 
@@ -264,6 +265,11 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                 }
 
                 @Override
+                public void responseNlpJson(String json) {
+                    Log.i("activity->", "json:" + json);
+                }
+
+                @Override
                 public void responseCmd(String cmd, String cmdText) {
                     Log.i("activity->", "指令:" + cmd);
                     Log.e("activity->", "是否正在播放:" + mMediaPlayerService.isPlaying());
@@ -292,10 +298,12 @@ public class VoiceMainActivity extends AppCompatActivity implements View.OnClick
                     replyMsg(code + ":" + message);
                 }
             }, mContext);
-            mRecordService.setRequestOpenId("e8368c10&6c3b1f82");
+            mRecordService.setRequestOpenId("29e08b82&0e56eb43");
             mRecordService.setBase64(false);
-            mRecordService.setRequestUrl("http://192.168.3.21:8080/speech/api/voice/asr/chineseMedicine");
-//            mRecordService.setRequestUrl("http://www.sonnhe.com:8080/speech/api/voice/asr/");
+            mRecordService.setRequestType(0);
+            mRecordService.setRequestUrl("http://www.sonnhe.com/speech/api/voice/asrV2/market");
+//            mRecordService.setRequestUrl("http://192.168.3.21:8080/speech/api/voice/asrV2/");
+//            mRecordService.setRequestUrl("http://60.205.112.156:8080/xunfeiasr/api/voice/");
         }
     }
 

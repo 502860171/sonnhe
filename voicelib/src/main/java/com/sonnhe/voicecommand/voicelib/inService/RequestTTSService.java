@@ -63,6 +63,11 @@ public class RequestTTSService extends HandlerThread implements Handler.Callback
         return super.quit();
     }
 
+    public void release() {
+        mMainHandler.removeCallbacksAndMessages(null);
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
     @Override
     public boolean handleMessage(Message message) {
         switch (message.what) {
@@ -111,7 +116,6 @@ public class RequestTTSService extends HandlerThread implements Handler.Callback
                     }
                 });
             }
-            Log.e("lib->", "responseBody:" + responseBody);
             analysisResult(responseBody);
         } catch (IOException e) {
             e.printStackTrace();

@@ -41,11 +41,17 @@ public class AudioTrackHandlerThread extends HandlerThread implements Handler.Ca
 
     @Override
     public boolean quit() {
+        release();
+        return super.quit();
+    }
+
+    public void release() {
+        mMainHandler.removeCallbacksAndMessages(null);
+        mHandler.removeCallbacksAndMessages(null);
         if (track != null) {
             track.release();
             track = null;
         }
-        return super.quit();
     }
 
     @Override

@@ -96,4 +96,9 @@ public class SonnheTTSService {
     public void stopPlay() {
         mAudioTrackHandlerThread.stopPlay();
     }
+
+    public void release() {
+        mAudioTrackHandlerThread.release();
+        mRequestTTSService.release();
+    }
 }

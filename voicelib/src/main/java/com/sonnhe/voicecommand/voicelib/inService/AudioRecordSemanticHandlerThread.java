@@ -38,13 +38,12 @@ import okhttp3.Response;
 public class AudioRecordSemanticHandlerThread extends HandlerThread implements Handler.Callback {
 
     private static final String APP_FILE_DIRECTORY = File.separator + "voice";
-    private static final String URL = "http://www.sonnhe.com:8080";
-    //    private static final String URL = "http://192.168.3.21:8080";
-//    private static final String REQUEST_OPENID = "123456789";
+    private static final String URL = "http://www.sonnhe.com";
 
     private static final String REQUEST_HTTP_ASR = URL + "/speech/api/voice/asr/";
     // 是否使用 base64 方式传输
     private boolean isBase64 = false;
+    private int requestType = 0;
 
 
     private String mRequestUrl = REQUEST_HTTP_ASR;
@@ -80,6 +79,8 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
         void responseAsr(VoiceResult asr);
 
         void responseNlp(String nlp);
+
+        void responseNlpJson(String json);
 
         void responseCmd(String cmd, String cmdText);
 
@@ -118,14 +119,23 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
             if (TextUtils.isEmpty(androidId)) {
                 androidId = "sonnheAndroidId";
             }
-            this.mRequestOpenId = requestOpenId + "&" + androidId;
+            if (requestOpenId.contains("&")) {
+                this.mRequestOpenId = requestOpenId + "&" + androidId;
+            } else if (requestOpenId.contains("|")) {
+                this.mRequestOpenId = requestOpenId + "|" + androidId;
+            }
         } else {
             this.mRequestOpenId = "123456789";
         }
+        Log.e("lib->", "requestOpenId:" + this.mRequestOpenId);
     }
 
     public void setBase64(boolean base64) {
         isBase64 = base64;
+    }
+
+    public void setRequestType(int requestType) {
+        this.requestType = requestType;
     }
 
     @Override
@@ -355,8 +365,13 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
      *
      * @param result server回传的json String
      */
-    private void analysisResult(String result) throws JSONException {
-        Log.e("lib->", "nlp:" + result);
+    private void analysisResult(final String result) throws JSONException {
+        mMainHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mRecordCallback.responseNlpJson(result);
+            }
+        });
         JSONObject object = new JSONObject(result);
         final int code = object.getInt("code");
         final String message = object.getString("message");
@@ -389,43 +404,6 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                     }
                 });
             }
-//            if (type == 0) {
-////                final String text = data.getString("text");
-//                if (!data.isNull("cmd")) {
-//                    final String cmd = data.getString("cmd");
-//                    final String cmdText = data.getString("text");
-//                    mMainHandler.post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            mRecordCallback.responseCmd(cmd, cmdText);
-//                        }
-//                    });
-//                }
-//                final VoiceResult voiceResult = voiceResultHandler(result);
-//                mMainHandler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        mRecordCallback.responseAsr(voiceResult);
-//                    }
-//                });
-//                if (!data.isNull("tts")) {
-//                    final String tts = data.getString("tts");
-//                    mMainHandler.post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            mRecordCallback.responseNlp(tts);
-//                        }
-//                    });
-//                }
-//            } else if (type == 1) {
-//                final String tts = data.getString("tts");
-//                mMainHandler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        mRecordCallback.responseNlp(tts);
-//                    }
-//                });
-//            }
         } else {
             mMainHandler.post(new Runnable() {
                 @Override
@@ -498,6 +476,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("file", "file", fileBody)
                 .addFormDataPart("openId", openId)
+                .addFormDataPart("type", String.valueOf(requestType))
                 .build();
         Request request = new Request.Builder()
                 .url(url)
@@ -521,6 +500,7 @@ public class AudioRecordSemanticHandlerThread extends HandlerThread implements H
                 .add("text", text)
                 .add("openId", openId)
                 .add("isBase64", String.valueOf(isBase64))
+                .add("type", String.valueOf(requestType))
                 .build();
         Request request = new Request.Builder()
                 .url(url)

@@ -34,6 +34,8 @@ public class AudioRecordService {
 
         void responseNlp(String nlp);
 
+        void responseNlpJson(String json);
+
         void responseCmd(String cmd, String cmdText);
 
         void responseError(int code, String message);
@@ -55,6 +57,10 @@ public class AudioRecordService {
 
     public void setBase64(boolean base64) {
         mAudioRecordSemanticHandlerThread.setBase64(base64);
+    }
+
+    public void setRequestType(int type) {
+        mAudioRecordSemanticHandlerThread.setRequestType(type);
     }
 
     private void initRecordService() {
@@ -93,6 +99,11 @@ public class AudioRecordService {
                 @Override
                 public void responseNlp(String nlp) {
                     mRecordCallback.responseNlp(nlp);
+                }
+
+                @Override
+                public void responseNlpJson(String json) {
+                    mRecordCallback.responseNlpJson(json);
                 }
 
                 @Override
