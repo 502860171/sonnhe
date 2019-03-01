@@ -1,7 +1,15 @@
 <resources>
-    <string name="app_name">语音指令</string>
+    <string name="app_name">手机助手</string>
 
     <string name="say_hello">Hi,我是小赫，有事尽管吩咐？</string>
     <string name="send">点击说话</string>
     <string name="stop">点击停止</string>
+    <string name="accessibility_description">autoreply_service</string>
+    <string name="title_activity_permissions">PermissionsActivity</string>
+    <string name="help">帮助</string>
+    <string name="string_help_text">请求权限</string>
+    <string name="quit">退出</string>
+    <string name="settings">设置</string>
+    <string name="service_wechat_label">智能手机助手</string>
+    <string name="service_wechat_description">声赫智能手机助手-微信辅助功能</string>
 </resources>
